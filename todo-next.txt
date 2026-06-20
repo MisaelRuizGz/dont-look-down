@@ -1,0 +1,13 @@
+1. Add a way to check past wpm scores 
+- html & JS
+
+2. Add more movie texts and fix the ones i have 
+so it isnt as buggy to type 
+- data file
+
+3. fix the underline function so that it doesnt dissapear behind text 
+- html & JS
+
+4. make the website look better and seem like a real website
+    better colors so its more appealing, maybe a logo, links to github 
+- html & css
