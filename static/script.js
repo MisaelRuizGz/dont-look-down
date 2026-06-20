@@ -37,13 +37,10 @@ function load_text(sample_text) {
     }
 }
 
-
-// ============================================================
 // APPEND TEXT
 // Adds more spans onto the END of the existing text instead of
 // replacing it. Used when the user is close to finishing so the
 // test never "runs out" of text during longer timers.
-// ============================================================
 function append_text(new_text) {
     let start_index = sample_text_element.children.length // where to continue numbering ids from
     target_text += new_text
@@ -60,12 +57,11 @@ function append_text(new_text) {
 }
 
 
-// ============================================================
 // RESTART
 // Resets all game state back to defaults without reloading the page.
 // Username and high score are NOT reset.
-// ============================================================
 function restart() {
+
     seconds = 0
     timer_started = false
     correct_char = 0
@@ -86,11 +82,8 @@ function restart() {
 document.getElementById("restart-btn").addEventListener("click", restart)
 
 
-// ============================================================
 // USERNAME CONFIRM
-// Grabs the username, updates the high score display, then hides
-// the input and button so it's out of the way.
-// ============================================================
+// Grabs the username, updates the high score display then text area disappears
 confirm_btn.addEventListener("click", function() {
     username = username_input.value
     document.getElementById("high-score-display").textContent = username + "'s Highest Score: 0"
@@ -100,10 +93,8 @@ confirm_btn.addEventListener("click", function() {
 })
 
 
-// ============================================================
 // MAIN INPUT LISTENER
 // Fires every time the user types in the input box.
-// ============================================================
 input_box.addEventListener("input", function(e) {
     let user_input = input_box.value
 
@@ -168,9 +159,8 @@ input_box.addEventListener("input", function(e) {
 })
 
 
-// ============================================================
-// CATEGORY BUTTONS (movies / words)
-// ============================================================
+
+// category buttons 
 document.querySelectorAll(".category-btn").forEach(function(btn) {
     btn.addEventListener("click", function() {
         selected_category = btn.dataset.category
@@ -183,9 +173,7 @@ document.querySelectorAll(".category-btn").forEach(function(btn) {
 })
 
 
-// ============================================================
-// TIME BUTTONS (30 / 60 / 120 / 180)
-// ============================================================
+// time buttons
 document.querySelectorAll(".time-btn").forEach(function(btn) {
     btn.addEventListener("click", function() {
         user_selected_time = parseInt(btn.dataset.time)
@@ -193,10 +181,8 @@ document.querySelectorAll(".time-btn").forEach(function(btn) {
 })
 
 
-// ============================================================
-// INITIAL LOAD
-// Fetch and load the first practice text when the page opens.
-// ============================================================
+
+// initial load, fetch and load the first practice text when the page opens.
 fetch(`${API_URL}/get-text?category=${selected_category}`)
     .then(function(response) { return response.json() })
     .then(function(data) {
