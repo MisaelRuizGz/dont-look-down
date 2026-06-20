@@ -17,11 +17,7 @@ app.add_middleware(
 # Remember last movie file
 last_chosen_movie = None
 
-
-# ============================================================
-# WORD GENERATOR
-# Picks random words from a txt file
-# ============================================================
+# WORD GENERATOR, Picks random words from a txt file
 def get_random_words(filename, amount=100):
     with open(filename, "r", encoding="utf-8") as file:
         words = file.read().split()
@@ -31,9 +27,8 @@ def get_random_words(filename, amount=100):
     return " ".join(words[:amount])
 
 
-# ============================================================
-# GET TEXT API
-# ============================================================
+
+# Text api
 @app.get("/get-text")
 def get_text(category: str = "movies"):
 
@@ -42,9 +37,10 @@ def get_text(category: str = "movies"):
     print("CATEGORY RECEIVED:", category)
 
 
-    # ========================================================
-    # WORD MODE
-    # ========================================================
+    
+    # checks if user selects words or movies
+
+    # words mod
     if category == "words":
 
         words_folder = "data/words"
@@ -82,9 +78,8 @@ def get_text(category: str = "movies"):
 
 
 
-    # ========================================================
-    # MOVIE MODE
-    # ========================================================
+    
+    # movie mode
     if category == "movies":
 
         movies_folder = "data/movies"
@@ -136,10 +131,7 @@ def get_text(category: str = "movies"):
             "text": text
         }
 
-
-    # ========================================================
     # UNKNOWN CATEGORY
-    # ========================================================
     return {
         "text": "Invalid category"
     }
