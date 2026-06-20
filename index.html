@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Don't Look Down</title>
+
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+
+    </head>
+    <body>
+        <div class="container">
+
+            <div class="top-bar">
+                <div class="title-section">
+                    <h1 class="header">Dont Look<br>Down</h1>
+                    <p class="description">typing practice tool</p>
+                </div>
+
+                <div class="options-section">
+                    <div class="buttons">
+                        <button type="button" class="option-btn category-btn" data-category="movies">movies</button>
+                        <button type="button" class="option-btn category-btn" data-category="words">words</button>
+                        <span class="divider">|</span>
+                        <button type="button" class="option-btn time-btn" data-time="30">30</button>
+                        <button type="button" class="option-btn time-btn" data-time="60">60</button>
+                        <button type="button" class="option-btn time-btn" data-time="120">120</button>
+                        <button type="button" class="option-btn time-btn" data-time="180">180</button>
+                        
+                    </div>
+                    <input type="text" id="username" placeholder="Enter username">
+                    <button type="button" id="confirm-username">confirm</button>
+                    
+                    
+                    <p class="high-score" id="high-score-display">User_name's Highest Score: ### wpm</p>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <p id="timer-display" class="timer">0</p>
+
+            <!-- Sample text -->
+            <h2 id="sample-text" class="sample-text"></h2>
+
+
+            <!-- Input box -->
+            <div style="text-align: center;">
+                <input type="text" id="user-text" name="user-text" placeholder="good luck" class="text-box">
+            </div>
+
+            <div style="text-align: center;">
+                
+        <button type="button" id="restart-btn" class="option-btn">restart</button>
+            </div>
+
+        </div>
+
+        <script src="script.js"></script>
+    </body>
+</html>
