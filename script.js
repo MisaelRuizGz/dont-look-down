@@ -1,5 +1,7 @@
 //Global Variables
 
+let API_URL = "https://dont-look-down-api.onrender.com" // backend URL
+
 let target_text = ""              // the full text the user needs to type (grows via append_text)
 let timer_started = false         // tracks whether the timer has started
 let seconds = 0                   // counts up each second during the test
@@ -74,7 +76,7 @@ function restart() {
     input_box.value = ""
     input_box.disabled = false
 
-    fetch(`http://127.0.0.1:8000/get-text?category=${selected_category}`)
+    fetch(`${API_URL}/get-text?category=${selected_category}`)
         .then(function(response) { return response.json() })
         .then(function(data) {
             load_text(data.text)
@@ -132,7 +134,7 @@ input_box.addEventListener("input", function(e) {
     // ---- Fetch more text if the user is close to running out ----
     if (target_text.length - user_input.length < 50 && is_appending == false) {
         is_appending = true // lock so this doesn't fire again until the fetch finishes
-        fetch(`http://127.0.0.1:8000/get-text?category=${selected_category}`)
+        fetch(`${API_URL}/get-text?category=${selected_category}`)
             .then(function(response) { return response.json() })
             .then(function(data) {
                 append_text(data.text)
@@ -172,7 +174,7 @@ input_box.addEventListener("input", function(e) {
 document.querySelectorAll(".category-btn").forEach(function(btn) {
     btn.addEventListener("click", function() {
         selected_category = btn.dataset.category
-        fetch(`http://127.0.0.1:8000/get-text?category=${selected_category}`)
+        fetch(`${API_URL}/get-text?category=${selected_category}`)
             .then(function(response) { return response.json() })
             .then(function(data) {
                 load_text(data.text)
@@ -195,7 +197,7 @@ document.querySelectorAll(".time-btn").forEach(function(btn) {
 // INITIAL LOAD
 // Fetch and load the first practice text when the page opens.
 // ============================================================
-fetch(`http://127.0.0.1:8000/get-text?category=${selected_category}`)
+fetch(`${API_URL}/get-text?category=${selected_category}`)
     .then(function(response) { return response.json() })
     .then(function(data) {
         load_text(data.text)
