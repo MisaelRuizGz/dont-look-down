@@ -47,7 +47,7 @@ def get_text(category: str = "movies"):
     # ========================================================
     if category == "words":
 
-        words_folder = "texts/words"
+        words_folder = "data/words"
 
         print("Looking in:", words_folder)
 
@@ -87,7 +87,7 @@ def get_text(category: str = "movies"):
     # ========================================================
     if category == "movies":
 
-        movies_folder = "texts/movies"
+        movies_folder = "data/movies"
 
         print("Looking in:", movies_folder)
 
