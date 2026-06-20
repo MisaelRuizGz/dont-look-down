@@ -1,16 +1,3 @@
-'''
-app.py 
-
-This python file should get the sample text from 
-the txt file, create a version that works with the 
-JS file (add "" around each letter ("a"))
-
-Randomize which sample text gets choosen, also make
-it so that the same one cant be chosen twice in a row
-
-
-'''
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -18,7 +5,7 @@ import random
 
 app = FastAPI()
 
-# Allow the frontend to talk to the backend
+# Allow frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,24 +13,133 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-last_chosen = None
 
+# Remember last movie file
+last_chosen_movie = None
+
+
+# ============================================================
+# WORD GENERATOR
+# Picks random words from a txt file
+# ============================================================
+def get_random_words(filename, amount=100):
+    with open(filename, "r", encoding="utf-8") as file:
+        words = file.read().split()
+
+    random.shuffle(words)
+
+    return " ".join(words[:amount])
+
+
+# ============================================================
+# GET TEXT API
+# ============================================================
 @app.get("/get-text")
 def get_text(category: str = "movies"):
-    global last_chosen
 
-    texts_folder = f"texts/{category}"
-    files = [f for f in os.listdir(texts_folder) if f.endswith(".txt")]
+    global last_chosen_movie
 
-    available = [f for f in files if f != last_chosen]
+    print("CATEGORY RECEIVED:", category)
 
-    if len(available) == 0:
-        available = files
 
-    chosen = random.choice(available)
-    last_chosen = chosen
+    # ========================================================
+    # WORD MODE
+    # ========================================================
+    if category == "words":
 
-    with open(os.path.join(texts_folder, chosen), "r") as file:
-        text = file.read()
+        words_folder = "texts/words"
 
-    return {"text": text}
+        print("Looking in:", words_folder)
+
+        files = [
+            f for f in os.listdir(words_folder)
+            if f.endswith(".txt")
+        ]
+
+        print("Word files found:", files)
+
+
+        if len(files) == 0:
+            return {
+                "text": "No word files found"
+            }
+
+
+        chosen = random.choice(files)
+
+        print("Chosen word file:", chosen)
+
+
+        text = get_random_words(
+            os.path.join(words_folder, chosen),
+            100
+        )
+
+
+        return {
+            "text": text
+        }
+
+
+
+    # ========================================================
+    # MOVIE MODE
+    # ========================================================
+    if category == "movies":
+
+        movies_folder = "texts/movies"
+
+        print("Looking in:", movies_folder)
+
+        files = [
+            f for f in os.listdir(movies_folder)
+            if f.endswith(".txt")
+        ]
+
+
+        print("Movie files found:", files)
+
+
+        if len(files) == 0:
+            return {
+                "text": "No movie files found"
+            }
+
+
+        available = [
+            f for f in files
+            if f != last_chosen_movie
+        ]
+
+
+        if len(available) == 0:
+            available = files
+
+
+        chosen = random.choice(available)
+
+        last_chosen_movie = chosen
+
+
+        print("Chosen movie file:", chosen)
+
+
+        with open(
+            os.path.join(movies_folder, chosen),
+            "r",
+            encoding="utf-8"
+        ) as file:
+            text = file.read()
+
+
+        return {
+            "text": text
+        }
+
+
+    # ========================================================
+    # UNKNOWN CATEGORY
+    # ========================================================
+    return {
+        "text": "Invalid category"
+    }
