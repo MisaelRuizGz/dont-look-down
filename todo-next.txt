@@ -11,3 +11,5 @@ so it isnt as buggy to type
 4. make the website look better and seem like a real website
     better colors so its more appealing, maybe a logo, links to github 
 - html & css
+
+5. make a way for people to sign in and remmeber their scores
