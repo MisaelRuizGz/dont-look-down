@@ -1,5 +1,7 @@
 //Global Variables
 
+let dev = "misael"
+
 let API_URL = "https://dont-look-down-api.onrender.com" 
 
 let target_text = ""              
@@ -11,7 +13,8 @@ let wpm = 0
 let high_score = 0                
 let username = ""                 
 let selected_category = "movies"  
-let is_appending = false         
+let is_appending = false    
+     
 
 
 // DOM elements
