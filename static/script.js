@@ -1,17 +1,17 @@
 //Global Variables
 
-let API_URL = "https://dont-look-down-api.onrender.com" // backend URL
+let API_URL = "https://dont-look-down-api.onrender.com" 
 
-let target_text = ""              // the full text the user needs to type (grows via append_text)
-let timer_started = false         // tracks whether the timer has started
-let seconds = 0                   // counts up each second during the test
-let user_selected_time = 30       // how long the test runs (default 30s)
-let correct_char = 0              // number of correctly typed characters
-let wpm = 0                       // calculated words per minute
-let high_score = 0                // best WPM across all attempts this session
-let username = ""                 // player name set by the user
-let selected_category = "movies"  // which text category to fetch from ("movies" or "words")
-let is_appending = false          // prevents append_text from firing multiple times at once
+let target_text = ""              
+let timer_started = false         
+let seconds = 0                   
+let user_selected_time = 30       
+let correct_char = 0              
+let wpm = 0                       
+let high_score = 0                
+let username = ""                 
+let selected_category = "movies"  
+let is_appending = false         
 
 
 // DOM elements
@@ -21,12 +21,11 @@ let confirm_btn = document.getElementById("confirm-username")
 let sample_text_element = document.getElementById("sample-text")
 
 
-// LOAD TEXT
-// Clears the page and builds spans for a brand new practice text.
+// load text
 // Called on page load, category change, and restart.
 function load_text(sample_text) {
     target_text = sample_text
-    sample_text_element.innerHTML = "" // clear any old spans first
+    sample_text_element.innerHTML = "" 
     let temp_text = sample_text.split("")
 
     for (let i = 0; i < temp_text.length; i++) {
@@ -37,12 +36,10 @@ function load_text(sample_text) {
     }
 }
 
-// APPEND TEXT
-// Adds more spans onto the END of the existing text instead of
-// replacing it. Used when the user is close to finishing so the
-// test never "runs out" of text during longer timers.
+// append makes sure the text never runs out for users
+
 function append_text(new_text) {
-    let start_index = sample_text_element.children.length // where to continue numbering ids from
+    let start_index = sample_text_element.children.length 
     target_text += new_text
     let temp_text = new_text.split("")
 
@@ -53,12 +50,11 @@ function append_text(new_text) {
         sample_text_element.appendChild(span)
     }
 
-    is_appending = false // unlock so future appends can happen again
+    is_appending = false 
 }
 
 
-// RESTART
-// Resets all game state back to defaults without reloading the page.
+// reset, puts the game state back to defaults without reloading the page.
 // Username and high score are NOT reset.
 function restart() {
 
@@ -82,7 +78,7 @@ function restart() {
 document.getElementById("restart-btn").addEventListener("click", restart)
 
 
-// USERNAME CONFIRM
+// username 
 // Grabs the username, updates the high score display then text area disappears
 confirm_btn.addEventListener("click", function() {
     username = username_input.value
@@ -93,19 +89,18 @@ confirm_btn.addEventListener("click", function() {
 })
 
 
-// MAIN INPUT LISTENER
-// Fires every time the user types in the input box.
+// main input listener, if user types in the text box this catches it
 input_box.addEventListener("input", function(e) {
     let user_input = input_box.value
 
-    // ---- Start the timer on the first keypress ----
+    // timer start on keypress
     if (timer_started == false) {
         timer_started = true
         let timer = setInterval(function() {
             seconds++
             document.getElementById("timer-display").textContent = seconds
 
-            // ---- Stop the timer and calculate WPM when time is up ----
+            // timer stops and calculates wpm 
             if (seconds == user_selected_time) {
                 clearInterval(timer)
                 input_box.disabled = true
@@ -113,7 +108,6 @@ input_box.addEventListener("input", function(e) {
                 wpm = (correct_char / 5) * (60 / seconds)
                 document.getElementById("timer-display").textContent = Math.round(wpm) + " wpm"
 
-                // ---- Update high score if this attempt is better ----
                 if (wpm > high_score) {
                     high_score = wpm
                     document.getElementById("high-score-display").textContent = username + "'s Highest Score: " + Math.round(high_score) + " wpm"
@@ -122,9 +116,9 @@ input_box.addEventListener("input", function(e) {
         }, 1000)
     }
 
-    // ---- Fetch more text if the user is close to running out ----
+
     if (target_text.length - user_input.length < 50 && is_appending == false) {
-        is_appending = true // lock so this doesn't fire again until the fetch finishes
+        is_appending = true 
         fetch(`${API_URL}/get-text?category=${selected_category}`)
             .then(function(response) { return response.json() })
             .then(function(data) {
@@ -132,14 +126,14 @@ input_box.addEventListener("input", function(e) {
             })
     }
 
-    // ---- Reset all letters back to default color/no underline ----
+    // reset all letters back to default color
     for (let i = 0; i < target_text.length; i++) {
         let temp_char = document.getElementById("char-" + i)
         temp_char.style.color = "#8ba8b8"
         temp_char.style.textDecoration = "none"
     }
 
-    // ---- Color typed characters green/red based on correctness ----
+    // color typed characters green/red 
     correct_char = 0
     for (let i = 0; i < user_input.length; i++) {
         let temp_char = document.getElementById("char-" + i)
@@ -151,7 +145,7 @@ input_box.addEventListener("input", function(e) {
         }
     }
 
-    // ---- Underline the current character ----
+    // underline the current character 
     let current_char = document.getElementById("char-" + user_input.length)
     if (current_char) {
         current_char.style.textDecoration = "underline"
