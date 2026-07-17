@@ -12,17 +12,14 @@ import random
 
 load_dotenv()
 
-# ============================================================
+
 # CONFIG
-# ============================================================
 DATABASE_URL = os.getenv("DATABASE_URL")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# ============================================================
-# APP SETUP
-# ============================================================
+# app start up 
 app = FastAPI()
 
 app.add_middleware(
@@ -32,15 +29,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ============================================================
-# PASSWORD HASHING + OAUTH
-# ============================================================
+# password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-# ============================================================
-# DATABASE CONNECTION
-# ============================================================
+# connect to database
 def get_db():
     conn = psycopg2.connect(DATABASE_URL)
     try:
@@ -48,9 +41,8 @@ def get_db():
     finally:
         conn.close()
 
-# ============================================================
+
 # PYDANTIC MODELS
-# ============================================================
 class UserCreate(BaseModel):
     username: str
     password: str
@@ -62,9 +54,7 @@ class Token(BaseModel):
 class ScoreUpdate(BaseModel):
     high_score: int
 
-# ============================================================
-# JWT HELPERS
-# ============================================================
+# JWT helpers
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -87,9 +77,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), conn = Depends(get_db)
         raise HTTPException(status_code=401, detail="User not found")
     return {"id": user[0], "username": user[1]}
 
-# ============================================================
-# AUTH ENDPOINTS
-# ============================================================
+# auth end points
 @app.post("/signup")
 def signup(user: UserCreate, conn = Depends(get_db)):
     cur = conn.cursor()
@@ -129,9 +117,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), conn = Depends(get_d
     token = create_access_token({"sub": user[1]})
     return {"access_token": token, "token_type": "bearer"}
 
-# ============================================================
-# SCORE ENDPOINTS
-# ============================================================
+# score end points
 @app.get("/get-score")
 def get_score(current_user = Depends(get_current_user), conn = Depends(get_db)):
     cur = conn.cursor()
@@ -149,19 +135,16 @@ def save_score(score: ScoreUpdate, current_user = Depends(get_current_user), con
     conn.commit()
     return {"message": "Score saved"}
 
-# ============================================================
+
 # HEALTH CHECK
 # Keeps Supabase active via cron ping
-# ============================================================
 @app.get("/health")
 def health(conn = Depends(get_db)):
     cur = conn.cursor()
     cur.execute("SELECT 1")
     return {"status": "ok"}
 
-# ============================================================
-# TEXT ENDPOINT
-# ============================================================
+# text endpoints
 last_chosen_movie = None
 
 def get_random_words(filename, amount=100):
