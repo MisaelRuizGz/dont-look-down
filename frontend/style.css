@@ -96,3 +96,80 @@ body {
     display: block;
     margin: 0 auto;
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #2e3a42;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal h2 {
+    color: #e8f0f0;
+    margin: 0 0 8px 0;
+}
+
+.modal p {
+    color: #8ba8b8;
+    margin: 0;
+    font-size: 14px;
+}
+
+.modal-btn {
+    background: #8ba8b8;
+    border: none;
+    color: #2e3a42;
+    font-family: monaco, Consolas, "Lucida Console", monospace;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.modal-btn:hover {
+    background: #e8f0f0;
+}
+
+.modal-btn.guest {
+    background: none;
+    color: #8ba8b8;
+    font-size: 14px;
+}
+
+.modal-btn.guest:hover {
+    color: #e8f0f0;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 10px;
+    background: #3d4a52;
+    border: 1px solid #8ba8b8;
+    color: #e8f0f0;
+    font-family: monaco, Consolas, "Lucida Console", monospace;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.modal-error {
+    color: red;
+    font-size: 12px;
+    margin: 0;
+}

@@ -4,15 +4,49 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Don't Look Down</title>
-
         <link rel="stylesheet" href="style.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-
-
     </head>
     <body>
+
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="modal-overlay">
+            <div class="modal">
+
+                <!-- Choice screen -->
+                <div id="modal-choice">
+                    <h2>Welcome</h2>
+                    <p>Sign in to save your high score</p>
+                    <button type="button" id="show-login-btn" class="modal-btn">Log In</button>
+                    <button type="button" id="show-signup-btn" class="modal-btn">Sign Up</button>
+                    <button type="button" id="guest-btn" class="modal-btn guest">Continue as Guest</button>
+                </div>
+
+                <!-- Login form -->
+                <div id="modal-login" style="display:none">
+                    <h2>Log In</h2>
+                    <input type="text" id="login-username" placeholder="Username" class="modal-input">
+                    <input type="password" id="login-password" placeholder="Password" class="modal-input">
+                    <p id="login-error" class="modal-error"></p>
+                    <button type="button" id="login-submit-btn" class="modal-btn">Log In</button>
+                    <button type="button" id="back-from-login" class="modal-btn guest">Back</button>
+                </div>
+
+                <!-- Signup form -->
+                <div id="modal-signup" style="display:none">
+                    <h2>Sign Up</h2>
+                    <input type="text" id="signup-username" placeholder="Username" class="modal-input">
+                    <input type="password" id="signup-password" placeholder="Password" class="modal-input">
+                    <p id="signup-error" class="modal-error"></p>
+                    <button type="button" id="signup-submit-btn" class="modal-btn">Sign Up</button>
+                    <button type="button" id="back-from-signup" class="modal-btn guest">Back</button>
+                </div>
+
+            </div>
+        </div>
+
         <div class="container">
 
             <div class="top-bar">
@@ -30,13 +64,8 @@
                         <button type="button" class="option-btn time-btn" data-time="60">60</button>
                         <button type="button" class="option-btn time-btn" data-time="120">120</button>
                         <button type="button" class="option-btn time-btn" data-time="180">180</button>
-                        
                     </div>
-                    <input type="text" id="username" placeholder="Enter username">
-                    <button type="button" id="confirm-username">confirm</button>
-                    
-                    
-                    <p class="high-score" id="high-score-display">User_name's Highest Score: ### wpm</p>
+                    <p class="high-score" id="high-score-display">Guest's Highest Score: 0 wpm</p>
                 </div>
             </div>
 
@@ -46,27 +75,22 @@
             <!-- Sample text -->
             <h2 id="sample-text" class="sample-text"></h2>
 
-
             <!-- Input box -->
             <div style="text-align: center;">
                 <input type="text" id="user-text" name="user-text" placeholder="good luck" class="text-box">
             </div>
 
             <div style="text-align: center;">
-                
-        <button type="button" id="restart-btn" class="option-btn">restart</button>
+                <button type="button" id="restart-btn" class="option-btn">restart</button>
             </div>
 
         </div>
 
         <div>
-            <p class= "option-btn">
-                version: 1.0.0
-                <br>
-                state: buggy af 
-            </p>
+            <p class="option-btn">State: still buggy af</p>
+            <p class="option-btn">Version: 2.0.0</p>
         </div>
 
-        <script src="script.js?v=2"></script>
+        <script src="script.js"></script>
     </body>
 </html>
