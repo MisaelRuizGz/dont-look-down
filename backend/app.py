@@ -54,6 +54,11 @@ class Token(BaseModel):
 class ScoreUpdate(BaseModel):
     high_score: int
 
+class AttemptCreate(BaseModel):
+    wpm: int
+    category: str
+    duration: int
+
 # JWT helpers
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -134,6 +139,31 @@ def save_score(score: ScoreUpdate, current_user = Depends(get_current_user), con
     )
     conn.commit()
     return {"message": "Score saved"}
+
+# attempt history endpoints
+@app.post("/save-attempt")
+def save_attempt(attempt: AttemptCreate, current_user = Depends(get_current_user), conn = Depends(get_db)):
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO attempts (user_id, wpm, category, duration) VALUES (%s, %s, %s, %s)",
+        (current_user["id"], attempt.wpm, attempt.category, attempt.duration)
+    )
+    conn.commit()
+    return {"message": "Attempt saved"}
+
+@app.get("/get-history")
+def get_history(current_user = Depends(get_current_user), conn = Depends(get_db)):
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT wpm, category, duration, created_at FROM attempts WHERE user_id = %s ORDER BY created_at DESC LIMIT 20",
+        (current_user["id"],)
+    )
+    rows = cur.fetchall()
+    history = [
+        {"wpm": r[0], "category": r[1], "duration": r[2], "created_at": r[3].isoformat()}
+        for r in rows
+    ]
+    return {"history": history}
 
 
 # HEALTH CHECK
