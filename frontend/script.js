@@ -1,21 +1,30 @@
 let API_URL = "https://dont-look-down-api.onrender.com"
 
-let target_text = ""
+const RENDER_BATCH = 60
+
+let words = []
+let word_index = 0
+let word_states = []          // per-word {typed, correct}, once committed
+let render_window_start = 0
+let is_appending = false
+
 let timer = null
 let timer_started = false
 let seconds = 0
 let user_selected_time = 30
-let correct_char = 0
+let correct_chars = 0
 let wpm = 0
+
 let high_score = 0
 let username = "Guest"
 let selected_category = "movies"
-let is_appending = false
-let prev_length = 0
 let auth_token = localStorage.getItem("auth_token") || null
 
 let input_box = document.getElementById("user-text")
 let sample_text_element = document.getElementById("sample-text")
+let words_container = document.getElementById("words-container")
+let caret_el = document.getElementById("caret")
+let type_area_el = document.getElementById("type-area")
 
 
 // modal
@@ -236,43 +245,168 @@ function render_history(list) {
 }
 
 
-// text loading
-function load_text(sample_text) {
-    target_text = sample_text
-    prev_length = 0
-    sample_text_element.innerHTML = ""
-    let temp_text = sample_text.split("")
-    for (let i = 0; i < temp_text.length; i++) {
-        let span = document.createElement("span")
-        span.id = "char-" + i
-        span.textContent = temp_text[i]
-        sample_text_element.appendChild(span)
+// ---- word-based typing engine ----
+
+function build_word_element(word, index) {
+    let word_div = document.createElement("div")
+    word_div.className = "word"
+    word_div.id = "word-" + index
+    for (let i = 0; i < word.length; i++) {
+        let letter_span = document.createElement("span")
+        letter_span.className = "letter"
+        letter_span.textContent = word[i]
+        word_div.appendChild(letter_span)
+    }
+    return word_div
+}
+
+function render_window(start_index) {
+    render_window_start = start_index
+    words_container.innerHTML = ""
+    let end_index = Math.min(words.length, start_index + RENDER_BATCH)
+    for (let i = start_index; i < end_index; i++) {
+        words_container.appendChild(build_word_element(words[i], i))
+    }
+    mark_active_word()
+    update_caret()
+}
+
+function mark_active_word() {
+    let prev = document.querySelector(".word.current")
+    if (prev) prev.classList.remove("current")
+    let el = document.getElementById("word-" + word_index)
+    if (el) el.classList.add("current")
+}
+
+// restyle only the current word — this is what keeps typing smooth on long text
+function render_current_word_state() {
+    let word_el = document.getElementById("word-" + word_index)
+    if (!word_el) return
+    let target_word = words[word_index] || ""
+    let typed = input_box.value
+
+    word_el.querySelectorAll(".extra").forEach(function(el) { el.remove() })
+
+    let letter_spans = word_el.querySelectorAll(".letter")
+    for (let i = 0; i < letter_spans.length; i++) {
+        letter_spans[i].className = "letter"
+        if (i < typed.length) {
+            letter_spans[i].classList.add(typed[i] === target_word[i] ? "correct" : "incorrect")
+        }
+    }
+
+    if (typed.length > target_word.length) {
+        for (let i = target_word.length; i < typed.length; i++) {
+            let extra_span = document.createElement("span")
+            extra_span.className = "letter extra incorrect"
+            extra_span.textContent = typed[i]
+            word_el.appendChild(extra_span)
+        }
+    }
+
+    update_caret()
+}
+
+function update_caret() {
+    let word_el = document.getElementById("word-" + word_index)
+    if (!word_el) return
+
+    let typed_len = input_box.value.length
+    let all_letters = word_el.querySelectorAll(".letter")
+    let target_el = all_letters[typed_len]
+    let place_before = true
+
+    if (!target_el) {
+        target_el = all_letters[all_letters.length - 1]
+        place_before = false
+    }
+    if (!target_el) return
+
+    let rect = target_el.getBoundingClientRect()
+    let container_rect = sample_text_element.getBoundingClientRect()
+
+    caret_el.style.top = (rect.top - container_rect.top) + "px"
+    caret_el.style.left = ((place_before ? rect.left : rect.right) - container_rect.left) + "px"
+    caret_el.style.height = rect.height + "px"
+}
+
+function maybe_extend_render_window() {
+    if (words.length - word_index < 20 && is_appending == false) {
+        is_appending = true
+        fetch(`${API_URL}/get-text?category=${selected_category}`)
+            .then(function(response) { return response.json() })
+            .then(function(data) {
+                let new_words = data.text.split(/\s+/).filter(Boolean)
+                words = words.concat(new_words)
+                is_appending = false
+            })
+    }
+
+    // slide the render window forward, keeping the previous word so a correction is still possible
+    if (word_index - render_window_start >= RENDER_BATCH - 10) {
+        render_window(Math.max(0, word_index - 1))
     }
 }
 
-function append_text(new_text) {
-    let start_index = sample_text_element.children.length
-    target_text += new_text
-    let temp_text = new_text.split("")
-    for (let i = 0; i < temp_text.length; i++) {
-        let span = document.createElement("span")
-        span.id = "char-" + (start_index + i)
-        span.textContent = temp_text[i]
-        sample_text_element.appendChild(span)
+function commit_word() {
+    let typed = input_box.value
+    let target_word = words[word_index] || ""
+    let word_el = document.getElementById("word-" + word_index)
+    let is_correct = typed === target_word
+
+    word_states[word_index] = { typed: typed, correct: is_correct }
+
+    if (word_el) {
+        word_el.classList.remove("current")
+        word_el.classList.add(is_correct ? "word-correct" : "word-incorrect")
     }
-    is_appending = false
+
+    if (is_correct) {
+        correct_chars += target_word.length + 1 // +1 for the space
+    }
+
+    word_index++
+    input_box.value = ""
+    maybe_extend_render_window()
+    mark_active_word()
+    update_caret()
 }
 
+function start_timer() {
+    timer_started = true
+    timer = setInterval(function() {
+        seconds++
+        document.getElementById("timer-display").textContent = seconds
 
-// restart
+        if (seconds == user_selected_time) {
+            clearInterval(timer)
+            input_box.disabled = true
+
+            wpm = (correct_chars / 5) * (60 / seconds)
+            let rounded_wpm = Math.round(wpm)
+            document.getElementById("timer-display").textContent = rounded_wpm + " wpm"
+
+            record_attempt({ category: selected_category, duration: user_selected_time, wpm: rounded_wpm })
+
+            if (wpm > high_score) {
+                high_score = wpm
+                update_score_display()
+                save_score_to_db(rounded_wpm)
+            }
+        }
+    }, 1000)
+}
+
 function restart() {
     if (timer) clearInterval(timer)
     seconds = 0
     timer_started = false
-    correct_char = 0
     wpm = 0
+    correct_chars = 0
     is_appending = false
-    prev_length = 0
+    word_index = 0
+    word_states = []
+    words = []
 
     document.getElementById("timer-display").textContent = "0"
     input_box.value = ""
@@ -281,69 +415,47 @@ function restart() {
 
     fetch(`${API_URL}/get-text?category=${selected_category}`)
         .then(function(response) { return response.json() })
-        .then(function(data) { load_text(data.text) })
+        .then(function(data) {
+            words = data.text.split(/\s+/).filter(Boolean)
+            render_window(0)
+        })
 }
 document.getElementById("restart-btn").addEventListener("click", restart)
 
 
-// main typing listener
-input_box.addEventListener("input", function(e) {
-    let user_input = input_box.value
-
-    if (timer_started == false) {
-        timer_started = true
-        timer = setInterval(function() {
-            seconds++
-            document.getElementById("timer-display").textContent = seconds
-
-            if (seconds == user_selected_time) {
-                clearInterval(timer)
-                input_box.disabled = true
-
-                wpm = (correct_char / 5) * (60 / seconds)
-                let rounded_wpm = Math.round(wpm)
-                document.getElementById("timer-display").textContent = rounded_wpm + " wpm"
-
-                record_attempt({ category: selected_category, duration: user_selected_time, wpm: rounded_wpm })
-
-                if (wpm > high_score) {
-                    high_score = wpm
-                    update_score_display()
-                    save_score_to_db(rounded_wpm)
-                }
-            }
-        }, 1000)
+// keydown: space commits the word, backspace-on-empty can undo the previous wrong word
+input_box.addEventListener("keydown", function(e) {
+    if (e.key === " ") {
+        e.preventDefault()
+        if (input_box.value.length > 0) commit_word()
+        return
     }
 
-    if (target_text.length - user_input.length < 50 && is_appending == false) {
-        is_appending = true
-        fetch(`${API_URL}/get-text?category=${selected_category}`)
-            .then(function(response) { return response.json() })
-            .then(function(data) { append_text(data.text) })
-    }
-
-    let limit = Math.min(target_text.length, Math.max(user_input.length, prev_length) + 1)
-    for (let i = 0; i < limit; i++) {
-        let temp_char = document.getElementById("char-" + i)
-        temp_char.style.color = "#8ba8b8"
-        temp_char.style.textDecoration = "none"
-    }
-    prev_length = user_input.length
-
-    correct_char = 0
-    for (let i = 0; i < user_input.length; i++) {
-        let temp_char = document.getElementById("char-" + i)
-        if (user_input[i] == target_text[i]) {
-            correct_char++
-            temp_char.style.color = "green"
-        } else {
-            temp_char.style.color = "red"
+    if (e.key === "Backspace" && input_box.value.length === 0 && word_index > 0) {
+        let prev_state = word_states[word_index - 1]
+        if (prev_state && !prev_state.correct) {
+            e.preventDefault()
+            word_index--
+            let prev_el = document.getElementById("word-" + word_index)
+            if (prev_el) prev_el.classList.remove("word-incorrect")
+            input_box.value = prev_state.typed
+            word_states[word_index] = undefined
+            mark_active_word()
+            render_current_word_state()
         }
     }
-
-    let current_char = document.getElementById("char-" + user_input.length)
-    if (current_char) current_char.style.textDecoration = "underline"
 })
+
+// input: normal typing and backspace-within-word — only restyles the current word
+input_box.addEventListener("input", function() {
+    if (timer_started == false) start_timer()
+    render_current_word_state()
+})
+
+// click anywhere in the typing area to focus; show a hint when not focused
+input_box.addEventListener("focus", function() { type_area_el.classList.remove("blurred") })
+input_box.addEventListener("blur", function() { type_area_el.classList.add("blurred") })
+type_area_el.addEventListener("click", function() { input_box.focus() })
 
 
 // category / time buttons
@@ -376,4 +488,8 @@ render_history()
 
 fetch(`${API_URL}/get-text?category=${selected_category}`)
     .then(function(response) { return response.json() })
-    .then(function(data) { load_text(data.text) })
+    .then(function(data) {
+        words = data.text.split(/\s+/).filter(Boolean)
+        render_window(0)
+        input_box.focus()
+    })

@@ -71,12 +71,18 @@
 
         <p id="timer-display" class="timer">0</p>
 
-        <h2 id="sample-text" class="sample-text"></h2>
-
-        <div style="text-align: center;">
-            <label for="user-text" class="visually-hidden">Type the text above</label>
-            <input type="text" id="user-text" name="user-text" placeholder="good luck" class="text-box" autocomplete="off">
+        <!-- Typing area: click anywhere here to focus, then just type -->
+        <div id="type-area" class="type-area">
+            <div id="sample-text" class="sample-text">
+                <div id="words-container" class="words-container"></div>
+                <div id="caret" class="caret"></div>
+            </div>
+            <p id="focus-hint" class="focus-hint">click here or start typing to focus</p>
         </div>
+
+        <!-- Real input, kept off-screen. Captures keystrokes and mobile keyboards. -->
+        <input type="text" id="user-text" name="user-text" class="text-box-hidden"
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
 
         <div style="text-align: center;">
             <button type="button" id="restart-btn" class="option-btn">restart</button>
@@ -90,7 +96,7 @@
     </div>
 
     <footer class="site-footer">
-        <span class="option-btn">Version: 3.0.0</span>
+        <span class="option-btn">Version: 3.1.0</span>
         <a href="privacy.html" class="option-btn">Privacy Policy</a>
         <a href="terms.html" class="option-btn">Terms of Use</a>
         <a href="https://github.com/MisaelRuizGz/dont-look-down" class="option-btn" target="_blank" rel="noopener">GitHub</a>

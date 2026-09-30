@@ -64,12 +64,6 @@ body {
     text-align: center;
 }
 
-.sample-text {
-    text-align: center;
-    color: #8ba8b8;
-    margin: 40px 0 20px 0;
-}
-
 .timer {
     text-align: center;
     color: #e8f0f0;
@@ -77,13 +71,73 @@ body {
     margin: 10px 0;
 }
 
-.text-box {
-    text-align: center;
-    width: 400pt;
-    height: 100pt;
-    display: block;
+/* ---- typing area ---- */
+
+.type-area {
+    position: relative;
+    max-width: 700px;
     margin: 0 auto;
+    cursor: text;
 }
+
+.sample-text {
+    position: relative;
+    text-align: center;
+    color: #8ba8b8;
+    margin: 40px 0 20px 0;
+    font-size: 28px;
+    line-height: 1.8;
+}
+
+.words-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3em 0.6em;
+}
+
+.word { display: inline-flex; }
+
+.letter.correct { color: #6ec46e; }
+.letter.incorrect { color: #e06c6c; text-decoration: underline; }
+.letter.extra { color: #c94f4f; }
+
+.word.word-incorrect { text-decoration: underline; text-decoration-color: #e06c6c; }
+
+.caret {
+    position: absolute;
+    width: 2px;
+    background: #e8f0f0;
+    top: 0;
+    left: 0;
+    animation: caret-blink 1s step-end infinite;
+}
+
+@keyframes caret-blink {
+    50% { opacity: 0; }
+}
+
+.text-box-hidden {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.focus-hint {
+    display: none;
+    text-align: center;
+    color: #5a7080;
+    font-size: 14px;
+    margin-top: -8px;
+}
+
+.type-area.blurred .words-container { opacity: 0.3; }
+.type-area.blurred .caret { display: none; }
+.type-area.blurred .focus-hint { display: block; }
+
+/* ---- modal ---- */
 
 .modal-overlay {
     position: fixed;
@@ -152,14 +206,7 @@ body {
 
 .modal-error { color: red; font-size: 12px; margin: 0; }
 
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0,0,0,0);
-    white-space: nowrap;
-}
+/* ---- history ---- */
 
 .history-section {
     margin-top: 40px;
@@ -179,6 +226,8 @@ body {
 
 .history-row { color: #8ba8b8; font-size: 14px; text-align: center; margin: 0; }
 .history-empty { color: #5a7080; font-size: 14px; text-align: center; }
+
+/* ---- footer / legal ---- */
 
 .site-footer {
     text-align: center;
