@@ -171,8 +171,11 @@ def get_history(current_user = Depends(get_current_user), conn = Depends(get_db)
 @app.get("/health")
 def health(conn = Depends(get_db)):
     cur = conn.cursor()
-    cur.execute("SELECT 1")
+    cur.execute("INSERT INTO keepalive_log (pinged_at) VALUES (NOW())")
+    cur.execute("DELETE FROM keepalive_log WHERE id NOT IN (SELECT id FROM keepalive_log ORDER BY id DESC LIMIT 100)")
+    conn.commit()
     return {"status": "ok"}
+
 
 # text endpoints
 last_chosen_movie = None
